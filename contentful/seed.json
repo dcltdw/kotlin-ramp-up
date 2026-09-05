@@ -1,0 +1,1318 @@
+{
+  "contentTypes": [
+    {
+      "sys": {
+        "id": "product",
+        "type": "ContentType"
+      },
+      "displayField": "sku",
+      "name": "Product",
+      "description": "",
+      "fields": [
+        {
+          "id": "sku",
+          "name": "sku",
+          "type": "Symbol",
+          "localized": false,
+          "required": true,
+          "validations": [
+            {
+              "unique": true
+            }
+          ],
+          "disabled": false,
+          "omitted": false
+        },
+        {
+          "id": "name",
+          "name": "name",
+          "type": "Symbol",
+          "localized": false,
+          "required": true,
+          "validations": [],
+          "disabled": false,
+          "omitted": false
+        },
+        {
+          "id": "description",
+          "name": "description",
+          "type": "Text",
+          "localized": false,
+          "required": false,
+          "validations": [],
+          "disabled": false,
+          "omitted": false
+        },
+        {
+          "id": "priceMinor",
+          "name": "priceMinor",
+          "type": "Integer",
+          "localized": false,
+          "required": true,
+          "validations": [
+            {
+              "range": {
+                "min": 0,
+                "max": null
+              }
+            }
+          ],
+          "disabled": false,
+          "omitted": false
+        },
+        {
+          "id": "category",
+          "name": "category",
+          "type": "Link",
+          "localized": false,
+          "required": true,
+          "validations": [
+            {
+              "linkContentType": [
+                "category"
+              ]
+            }
+          ],
+          "disabled": false,
+          "omitted": false,
+          "linkType": "Entry"
+        },
+        {
+          "id": "regions",
+          "name": "regions",
+          "type": "Array",
+          "localized": false,
+          "required": true,
+          "validations": [],
+          "disabled": false,
+          "omitted": false,
+          "items": {
+            "type": "Symbol",
+            "validations": [
+              {
+                "in": [
+                  "US",
+                  "EU",
+                  "UK",
+                  "APAC"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "tags",
+          "name": "tags",
+          "type": "Array",
+          "localized": false,
+          "required": false,
+          "validations": [],
+          "disabled": false,
+          "omitted": false,
+          "items": {
+            "type": "Symbol",
+            "validations": []
+          }
+        },
+        {
+          "id": "image",
+          "name": "image",
+          "type": "Link",
+          "localized": false,
+          "required": false,
+          "validations": [],
+          "disabled": false,
+          "omitted": false,
+          "linkType": "Asset"
+        },
+        {
+          "id": "currency",
+          "name": "currency",
+          "type": "Symbol",
+          "localized": false,
+          "required": true,
+          "validations": [
+            {
+              "in": [
+                "USD",
+                "EUR",
+                "GBP"
+              ]
+            }
+          ],
+          "disabled": false,
+          "omitted": false
+        }
+      ]
+    },
+    {
+      "sys": {
+        "id": "category",
+        "type": "ContentType"
+      },
+      "displayField": "key",
+      "name": "Category",
+      "description": "",
+      "fields": [
+        {
+          "id": "key",
+          "name": "key",
+          "type": "Symbol",
+          "localized": false,
+          "required": true,
+          "validations": [
+            {
+              "unique": true
+            }
+          ],
+          "disabled": false,
+          "omitted": false
+        },
+        {
+          "id": "name",
+          "name": "name",
+          "type": "Symbol",
+          "localized": false,
+          "required": true,
+          "validations": [],
+          "disabled": false,
+          "omitted": false
+        },
+        {
+          "id": "parent",
+          "name": "parent",
+          "type": "Link",
+          "localized": false,
+          "required": false,
+          "validations": [
+            {
+              "linkContentType": [
+                "category"
+              ]
+            }
+          ],
+          "disabled": false,
+          "omitted": false,
+          "linkType": "Entry"
+        }
+      ]
+    },
+    {
+      "sys": {
+        "id": "cta",
+        "type": "ContentType"
+      },
+      "displayField": "ctaId",
+      "name": "CTA",
+      "description": "",
+      "fields": [
+        {
+          "id": "ctaId",
+          "name": "ctaId",
+          "type": "Symbol",
+          "localized": false,
+          "required": true,
+          "validations": [
+            {
+              "unique": true
+            }
+          ],
+          "disabled": false,
+          "omitted": false
+        },
+        {
+          "id": "name",
+          "name": "name",
+          "type": "Symbol",
+          "localized": false,
+          "required": true,
+          "validations": [],
+          "disabled": false,
+          "omitted": false
+        },
+        {
+          "id": "variants",
+          "name": "variants",
+          "type": "Array",
+          "localized": false,
+          "required": true,
+          "validations": [
+            {
+              "size": {
+                "min": 1,
+                "max": null
+              }
+            }
+          ],
+          "disabled": false,
+          "omitted": false,
+          "items": {
+            "type": "Link",
+            "validations": [
+              {
+                "linkContentType": [
+                  "ctaVariant"
+                ]
+              }
+            ],
+            "linkType": "Entry"
+          }
+        }
+      ]
+    },
+    {
+      "sys": {
+        "id": "ctaVariant",
+        "type": "ContentType"
+      },
+      "displayField": "variantKey",
+      "name": "ctaVariant",
+      "description": "",
+      "fields": [
+        {
+          "id": "variantKey",
+          "name": "variantKey",
+          "type": "Symbol",
+          "localized": false,
+          "required": true,
+          "validations": [],
+          "disabled": false,
+          "omitted": false
+        },
+        {
+          "id": "label",
+          "name": "label",
+          "type": "Symbol",
+          "localized": false,
+          "required": true,
+          "validations": [],
+          "disabled": false,
+          "omitted": false
+        },
+        {
+          "id": "headline",
+          "name": "headline",
+          "type": "Symbol",
+          "localized": false,
+          "required": true,
+          "validations": [],
+          "disabled": false,
+          "omitted": false
+        },
+        {
+          "id": "body",
+          "name": "body",
+          "type": "Text",
+          "localized": false,
+          "required": false,
+          "validations": [],
+          "disabled": false,
+          "omitted": false
+        },
+        {
+          "id": "buttonLabel",
+          "name": "buttonLabel",
+          "type": "Symbol",
+          "localized": false,
+          "required": true,
+          "validations": [],
+          "disabled": false,
+          "omitted": false
+        }
+      ]
+    },
+    {
+      "sys": {
+        "id": "segment",
+        "type": "ContentType"
+      },
+      "displayField": "segmentId",
+      "name": "segment",
+      "description": "",
+      "fields": [
+        {
+          "id": "segmentId",
+          "name": "segmentId",
+          "type": "Symbol",
+          "localized": false,
+          "required": true,
+          "validations": [
+            {
+              "unique": true
+            }
+          ],
+          "disabled": false,
+          "omitted": false
+        },
+        {
+          "id": "name",
+          "name": "name",
+          "type": "Symbol",
+          "localized": false,
+          "required": true,
+          "validations": [],
+          "disabled": false,
+          "omitted": false
+        },
+        {
+          "id": "description",
+          "name": "description",
+          "type": "Text",
+          "localized": false,
+          "required": false,
+          "validations": [],
+          "disabled": false,
+          "omitted": false
+        }
+      ]
+    }
+  ],
+  "entries": [
+    {
+      "metadata": {
+        "tags": [],
+        "concepts": []
+      },
+      "sys": {
+        "id": "17QurLf3kOyqDJHCT7EFWR",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "category"
+          }
+        }
+      },
+      "fields": {
+        "key": {
+          "en-US": "dogs"
+        },
+        "name": {
+          "en-US": "dogs"
+        }
+      }
+    },
+    {
+      "metadata": {
+        "tags": [],
+        "concepts": []
+      },
+      "sys": {
+        "id": "1NPzoiPBhBB4EOvpImhEfM",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "category"
+          }
+        }
+      },
+      "fields": {
+        "key": {
+          "en-US": "cats"
+        },
+        "name": {
+          "en-US": "cats"
+        }
+      }
+    },
+    {
+      "metadata": {
+        "tags": [],
+        "concepts": []
+      },
+      "sys": {
+        "id": "2jXDiudoCHsKi4trRVtU2j",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "category"
+          }
+        }
+      },
+      "fields": {
+        "key": {
+          "en-US": "exotics"
+        },
+        "name": {
+          "en-US": "exotics"
+        }
+      }
+    },
+    {
+      "metadata": {
+        "tags": [],
+        "concepts": []
+      },
+      "sys": {
+        "id": "4L6ql0ajEQ6NvTOj7BHjyo",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "category"
+          }
+        }
+      },
+      "fields": {
+        "key": {
+          "en-US": "rabbits"
+        },
+        "name": {
+          "en-US": "rabbits"
+        },
+        "parent": {
+          "en-US": {
+            "sys": {
+              "type": "Link",
+              "linkType": "Entry",
+              "id": "2jXDiudoCHsKi4trRVtU2j"
+            }
+          }
+        }
+      }
+    },
+    {
+      "metadata": {
+        "tags": [],
+        "concepts": []
+      },
+      "sys": {
+        "id": "1HHbWH5qrdl9HtOp222qEG",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "segment"
+          }
+        }
+      },
+      "fields": {
+        "segmentId": {
+          "en-US": "vip"
+        },
+        "name": {
+          "en-US": "vip"
+        }
+      }
+    },
+    {
+      "metadata": {
+        "tags": [],
+        "concepts": []
+      },
+      "sys": {
+        "id": "3S3zlXqfcneLG7LJnRfFim",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "segment"
+          }
+        }
+      },
+      "fields": {
+        "segmentId": {
+          "en-US": "newsletter"
+        },
+        "name": {
+          "en-US": "newsletter"
+        }
+      }
+    },
+    {
+      "metadata": {
+        "tags": [],
+        "concepts": []
+      },
+      "sys": {
+        "id": "6VGmAAiy2axLJOwRVednxu",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "segment"
+          }
+        }
+      },
+      "fields": {
+        "segmentId": {
+          "en-US": "firstTimeBuyer"
+        },
+        "name": {
+          "en-US": "firstTimeBuyer"
+        }
+      }
+    },
+    {
+      "sys": {
+        "id": "zhGBj4ACILoawYIXfH1aw",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "product"
+          }
+        }
+      },
+      "fields": {
+        "sku": {
+          "en-US": "RAB-ALF-2KG"
+        },
+        "name": {
+          "en-US": "Alfalfa Pellets"
+        },
+        "description": {
+          "en-US": "High-protein alfalfa pellets for growing and nursing rabbits. 2kg bag."
+        },
+        "priceMinor": {
+          "en-US": 2599
+        },
+        "currency": {
+          "en-US": "USD"
+        },
+        "category": {
+          "en-US": {
+            "sys": {
+              "type": "Link",
+              "linkType": "Entry",
+              "id": "4L6ql0ajEQ6NvTOj7BHjyo"
+            }
+          }
+        },
+        "regions": {
+          "en-US": [
+            "US"
+          ]
+        }
+      }
+    },
+    {
+      "sys": {
+        "id": "37p7XpO9auyiI48sIOvToO",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "product"
+          }
+        }
+      },
+      "fields": {
+        "sku": {
+          "en-US": "RAB-TIM-2KG"
+        },
+        "name": {
+          "en-US": "Timothy Pellets"
+        },
+        "description": {
+          "en-US": "Timothy-based maintenance pellets for adult rabbits. High fibre, low calcium. 2kg bag."
+        },
+        "priceMinor": {
+          "en-US": 3099
+        },
+        "currency": {
+          "en-US": "USD"
+        },
+        "category": {
+          "en-US": {
+            "sys": {
+              "type": "Link",
+              "linkType": "Entry",
+              "id": "4L6ql0ajEQ6NvTOj7BHjyo"
+            }
+          }
+        },
+        "regions": {
+          "en-US": [
+            "US"
+          ]
+        }
+      }
+    },
+    {
+      "sys": {
+        "id": "7LHcNETgtYsNvubvglfRkF",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "product"
+          }
+        }
+      },
+      "fields": {
+        "sku": {
+          "en-US": "DOG-FD-ECON"
+        },
+        "name": {
+          "en-US": "Cheapo Dog Food"
+        },
+        "description": {
+          "en-US": "Everyday complete dry food for adult dogs. Chicken and rice."
+        },
+        "priceMinor": {
+          "en-US": 599
+        },
+        "currency": {
+          "en-US": "USD"
+        },
+        "category": {
+          "en-US": {
+            "sys": {
+              "type": "Link",
+              "linkType": "Entry",
+              "id": "17QurLf3kOyqDJHCT7EFWR"
+            }
+          }
+        },
+        "regions": {
+          "en-US": [
+            "US"
+          ]
+        }
+      }
+    },
+    {
+      "sys": {
+        "id": "rGR6vpaeH3lN40QEVqCCQ",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "product"
+          }
+        }
+      },
+      "fields": {
+        "sku": {
+          "en-US": "DOG-FD-PREM"
+        },
+        "name": {
+          "en-US": "Primo Dog Food"
+        },
+        "description": {
+          "en-US": "Grain-free complete dry food with deboned salmon and sweet potato."
+        },
+        "priceMinor": {
+          "en-US": 1599
+        },
+        "currency": {
+          "en-US": "USD"
+        },
+        "category": {
+          "en-US": {
+            "sys": {
+              "type": "Link",
+              "linkType": "Entry",
+              "id": "17QurLf3kOyqDJHCT7EFWR"
+            }
+          }
+        },
+        "regions": {
+          "en-US": [
+            "US"
+          ]
+        }
+      }
+    },
+    {
+      "sys": {
+        "id": "product-cat-tree-dlx",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "product"
+          }
+        }
+      },
+      "fields": {
+        "sku": {
+          "en-US": "CAT-TREE-DLX"
+        },
+        "name": {
+          "en-US": "Deluxe Cat Tree"
+        },
+        "description": {
+          "en-US": "Five-level sisal cat tree with two hammocks and a covered den. 180cm."
+        },
+        "priceMinor": {
+          "en-US": 18900
+        },
+        "currency": {
+          "en-US": "USD"
+        },
+        "category": {
+          "en-US": {
+            "sys": {
+              "type": "Link",
+              "linkType": "Entry",
+              "id": "1NPzoiPBhBB4EOvpImhEfM"
+            }
+          }
+        },
+        "regions": {
+          "en-US": [
+            "US",
+            "UK",
+            "EU"
+          ]
+        },
+        "tags": {
+          "en-US": [
+            "vip"
+          ]
+        }
+      }
+    },
+    {
+      "sys": {
+        "id": "product-cat-ltr-auto",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "product"
+          }
+        }
+      },
+      "fields": {
+        "sku": {
+          "en-US": "CAT-LTR-AUTO"
+        },
+        "name": {
+          "en-US": "Self-Cleaning Litter Box"
+        },
+        "description": {
+          "en-US": "Automatic raking litter box with health tracking and odour seal."
+        },
+        "priceMinor": {
+          "en-US": 49900
+        },
+        "currency": {
+          "en-US": "USD"
+        },
+        "category": {
+          "en-US": {
+            "sys": {
+              "type": "Link",
+              "linkType": "Entry",
+              "id": "1NPzoiPBhBB4EOvpImhEfM"
+            }
+          }
+        },
+        "regions": {
+          "en-US": [
+            "US"
+          ]
+        },
+        "tags": {
+          "en-US": [
+            "vip",
+            "premium"
+          ]
+        }
+      }
+    },
+    {
+      "sys": {
+        "id": "product-cat-fd-salm",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "product"
+          }
+        }
+      },
+      "fields": {
+        "sku": {
+          "en-US": "CAT-FD-SALM"
+        },
+        "name": {
+          "en-US": "Salmon Pate 24-pack"
+        },
+        "description": {
+          "en-US": "Grain-free wet food pate with wild-caught salmon. 24 x 85g tins."
+        },
+        "priceMinor": {
+          "en-US": 3499
+        },
+        "currency": {
+          "en-US": "USD"
+        },
+        "category": {
+          "en-US": {
+            "sys": {
+              "type": "Link",
+              "linkType": "Entry",
+              "id": "1NPzoiPBhBB4EOvpImhEfM"
+            }
+          }
+        },
+        "regions": {
+          "en-US": [
+            "US",
+            "EU",
+            "UK",
+            "APAC"
+          ]
+        }
+      }
+    },
+    {
+      "sys": {
+        "id": "product-exo-terr-90",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "product"
+          }
+        }
+      },
+      "fields": {
+        "sku": {
+          "en-US": "EXO-TERR-90"
+        },
+        "name": {
+          "en-US": "90cm Glass Terrarium"
+        },
+        "description": {
+          "en-US": "Front-opening glass terrarium with mesh top for reptiles and amphibians."
+        },
+        "priceMinor": {
+          "en-US": 34900
+        },
+        "currency": {
+          "en-US": "USD"
+        },
+        "category": {
+          "en-US": {
+            "sys": {
+              "type": "Link",
+              "linkType": "Entry",
+              "id": "2jXDiudoCHsKi4trRVtU2j"
+            }
+          }
+        },
+        "regions": {
+          "en-US": [
+            "US",
+            "UK"
+          ]
+        },
+        "tags": {
+          "en-US": [
+            "fragile"
+          ]
+        }
+      }
+    },
+    {
+      "sys": {
+        "id": "product-exo-heat-150",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "product"
+          }
+        }
+      },
+      "fields": {
+        "sku": {
+          "en-US": "EXO-HEAT-150"
+        },
+        "name": {
+          "en-US": "Ceramic Heat Emitter 150W"
+        },
+        "description": {
+          "en-US": "Infrared ceramic heat emitter. No light output, suitable for night use."
+        },
+        "priceMinor": {
+          "en-US": 4299
+        },
+        "currency": {
+          "en-US": "USD"
+        },
+        "category": {
+          "en-US": {
+            "sys": {
+              "type": "Link",
+              "linkType": "Entry",
+              "id": "2jXDiudoCHsKi4trRVtU2j"
+            }
+          }
+        },
+        "regions": {
+          "en-US": [
+            "US",
+            "EU",
+            "UK"
+          ]
+        }
+      }
+    },
+    {
+      "sys": {
+        "id": "product-exo-bird-lg",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "product"
+          }
+        }
+      },
+      "fields": {
+        "sku": {
+          "en-US": "EXO-BIRD-LG"
+        },
+        "name": {
+          "en-US": "Large Flight Cage"
+        },
+        "description": {
+          "en-US": "Powder-coated flight cage for finches and budgerigars. Includes perches and feeders."
+        },
+        "priceMinor": {
+          "en-US": 27500
+        },
+        "currency": {
+          "en-US": "GBP"
+        },
+        "category": {
+          "en-US": {
+            "sys": {
+              "type": "Link",
+              "linkType": "Entry",
+              "id": "2jXDiudoCHsKi4trRVtU2j"
+            }
+          }
+        },
+        "regions": {
+          "en-US": [
+            "UK",
+            "EU"
+          ]
+        },
+        "tags": {
+          "en-US": [
+            "vip"
+          ]
+        }
+      }
+    },
+    {
+      "sys": {
+        "id": "product-rab-hutch-2t",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "product"
+          }
+        }
+      },
+      "fields": {
+        "sku": {
+          "en-US": "RAB-HUTCH-2T"
+        },
+        "name": {
+          "en-US": "Two-Tier Rabbit Hutch"
+        },
+        "description": {
+          "en-US": "Weatherproof two-tier hutch with ramp, tray and integrated run."
+        },
+        "priceMinor": {
+          "en-US": 22900
+        },
+        "currency": {
+          "en-US": "EUR"
+        },
+        "category": {
+          "en-US": {
+            "sys": {
+              "type": "Link",
+              "linkType": "Entry",
+              "id": "4L6ql0ajEQ6NvTOj7BHjyo"
+            }
+          }
+        },
+        "regions": {
+          "en-US": [
+            "EU"
+          ]
+        }
+      }
+    },
+    {
+      "sys": {
+        "id": "product-dog-bed-orth",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "product"
+          }
+        }
+      },
+      "fields": {
+        "sku": {
+          "en-US": "DOG-BED-ORTH"
+        },
+        "name": {
+          "en-US": "Orthopaedic Dog Bed"
+        },
+        "description": {
+          "en-US": "Memory-foam orthopaedic bed for older or large-breed dogs. Washable cover."
+        },
+        "priceMinor": {
+          "en-US": 12900
+        },
+        "currency": {
+          "en-US": "USD"
+        },
+        "category": {
+          "en-US": {
+            "sys": {
+              "type": "Link",
+              "linkType": "Entry",
+              "id": "17QurLf3kOyqDJHCT7EFWR"
+            }
+          }
+        },
+        "regions": {
+          "en-US": [
+            "US",
+            "APAC"
+          ]
+        },
+        "tags": {
+          "en-US": [
+            "vip"
+          ]
+        }
+      }
+    },
+    {
+      "sys": {
+        "id": "ctavariant-free-shipping-control",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "ctaVariant"
+          }
+        }
+      },
+      "fields": {
+        "variantKey": {
+          "en-US": "control"
+        },
+        "label": {
+          "en-US": "Free Shipping - Control"
+        },
+        "headline": {
+          "en-US": "Free shipping on orders over $50"
+        },
+        "body": {
+          "en-US": "Add a little more to your basket and delivery is on us."
+        },
+        "buttonLabel": {
+          "en-US": "Shop now"
+        }
+      }
+    },
+    {
+      "sys": {
+        "id": "ctavariant-free-shipping-urgency",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "ctaVariant"
+          }
+        }
+      },
+      "fields": {
+        "variantKey": {
+          "en-US": "urgency"
+        },
+        "label": {
+          "en-US": "Free Shipping - Urgency"
+        },
+        "headline": {
+          "en-US": "Free shipping ends Sunday"
+        },
+        "body": {
+          "en-US": "Free delivery on everything until midnight Sunday. No code needed."
+        },
+        "buttonLabel": {
+          "en-US": "Claim it"
+        }
+      }
+    },
+    {
+      "sys": {
+        "id": "ctavariant-vip-early-control",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "ctaVariant"
+          }
+        }
+      },
+      "fields": {
+        "variantKey": {
+          "en-US": "control"
+        },
+        "label": {
+          "en-US": "VIP Early Access - Control"
+        },
+        "headline": {
+          "en-US": "Early access for VIP members"
+        },
+        "body": {
+          "en-US": "New arrivals open to VIP members 48 hours before general release."
+        },
+        "buttonLabel": {
+          "en-US": "Browse early access"
+        }
+      }
+    },
+    {
+      "sys": {
+        "id": "ctavariant-vip-early-personalized",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "ctaVariant"
+          }
+        }
+      },
+      "fields": {
+        "variantKey": {
+          "en-US": "personalized"
+        },
+        "label": {
+          "en-US": "VIP Early Access - Personalized"
+        },
+        "headline": {
+          "en-US": "Your early access is open"
+        },
+        "body": {
+          "en-US": "We picked a few new arrivals based on what you have been browsing."
+        },
+        "buttonLabel": {
+          "en-US": "See your picks"
+        }
+      }
+    },
+    {
+      "sys": {
+        "id": "cta-free-shipping",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "cta"
+          }
+        }
+      },
+      "fields": {
+        "ctaId": {
+          "en-US": "free-shipping"
+        },
+        "name": {
+          "en-US": "Free Shipping Banner"
+        },
+        "variants": {
+          "en-US": [
+            {
+              "sys": {
+                "type": "Link",
+                "linkType": "Entry",
+                "id": "ctavariant-free-shipping-control"
+              }
+            },
+            {
+              "sys": {
+                "type": "Link",
+                "linkType": "Entry",
+                "id": "ctavariant-free-shipping-urgency"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "sys": {
+        "id": "cta-vip-early-access",
+        "type": "Entry",
+        "contentType": {
+          "sys": {
+            "type": "Link",
+            "linkType": "ContentType",
+            "id": "cta"
+          }
+        }
+      },
+      "fields": {
+        "ctaId": {
+          "en-US": "vip-early-access"
+        },
+        "name": {
+          "en-US": "VIP Early Access"
+        },
+        "variants": {
+          "en-US": [
+            {
+              "sys": {
+                "type": "Link",
+                "linkType": "Entry",
+                "id": "ctavariant-vip-early-control"
+              }
+            },
+            {
+              "sys": {
+                "type": "Link",
+                "linkType": "Entry",
+                "id": "ctavariant-vip-early-personalized"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
