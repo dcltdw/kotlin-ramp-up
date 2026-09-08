@@ -100,6 +100,177 @@ when an endpoint exists to receive it.
 
 ---
 
+## What the evaluator does
+
+The evaluator has **two** inputs, not one:
+
+```
+evaluate(ruleset, context) → decisions
+         ▲        ▲           ▲
+         │        │           └─ Include / Exclude / ShowCta / HideCta
+         │        └───────────── facts about this customer
+         └────────────────────── the policy someone authored
+```
+
+The context is the easy half to picture. The **ruleset** is the half that makes
+the evaluator look like it has nothing to do if you have not met it yet.
+
+### A rule is an if-then pair
+
+> **if** `Segment("vip") AND CartValue >= 100.usd AND NOT Region("EU")`
+> **then** `ShowCta("free-shipping", "urgency")`
+
+The left side is an **expression**: it answers *does this rule apply to this
+customer?* and evaluates to a `Boolean`. The right side is the **decisions** to
+emit when it does. A ruleset is a list of those pairs.
+
+So the evaluator's job, per rule: evaluate the expression against the context,
+and if it is true, emit that rule's decisions. Collect everything emitted. That
+is the whole mechanism.
+
+### Worked through with the seeded data
+
+The same rule, against two customers:
+
+**Customer A** — `segments={vip}`, cart `$129 USD`, `region=US`
+
+| Predicate | Reads | Result |
+|:--|:--|:--|
+| `Segment("vip")` | is `vip` in `{vip}`? | true |
+| `CartValue gte 100.usd` | same currency, `12900 >= 10000` | true |
+| `NOT Region("EU")` | `US ≠ EU` | true |
+| `AND` of the three | | **true** |
+
+Emits `ShowCta(free-shipping, urgency)`.
+
+**Customer B** — `segments={newsletter}`, cart `$59 USD`, `region=EU`
+
+`Segment("vip")` is false, so the `AND` is false. Emits **nothing**.
+
+Same ruleset, same evaluator, different answers — because the context differed.
+That is what "the context is the independent variable" means in practice, and
+why the seeded catalog was built with values either side of every threshold.
+
+### Why it recurses
+
+The expression is not flat. It is a tree:
+
+```
+And
+├── Segment(vip)                 ← leaf: reads the context
+├── CartValueAtLeast(100 USD)    ← leaf: reads the context
+└── Not
+    └── Region(EU)               ← leaf: reads the context
+```
+
+Evaluating it means walking that tree:
+
+- `And` — evaluate each child, combine with `&&`
+- `Or` — evaluate each child, combine with `||`
+- `Not` — evaluate the child, negate it
+- a leaf — read the relevant fact from the context and compare
+
+The composite nodes **recurse**; only the leaves touch the context. This is the
+classic **tree-walking interpreter**, which is the term to search for if you want
+the literature.
+
+That is also why the hierarchy is sealed. The evaluator is one `when` with a
+branch per node type, so adding a fifth predicate later stops the build until it
+has been handled — in the evaluator, in the serializer, everywhere. The plan's
+line about the compiler walking you through every evaluator, serializer and
+explainer that needs updating is describing exactly this.
+
+### Why rules are data instead of `if` statements
+
+This is the question underneath the whole design, and it is worth being explicit
+about.
+
+You could hardcode `if (customer.isVip && cart >= 100) showFreeShippingBanner()`.
+But that policy changes weekly, and every change would mean editing Kotlin,
+running CI and redeploying.
+
+Making rules **data** means the policy can be authored, stored, versioned and
+swapped without touching the engine. The evaluator gets written once. That is
+what a rules engine *is* — and it is why the ruleset needs serialization while
+the context does not: a ruleset is saved and reloaded, a context is discarded
+after one request.
+
+## Rulesets
+
+### Does `Ruleset` need to be a type?
+
+`List<Rule>` might be enough, and a wrapper earns its place only if it carries
+something more. One argument settles it: **a bare list serializes to a JSON
+array, which leaves nowhere to put a schema version.** Wrap it and there is room
+to grow.
+
+```json
+{ "version": 1, "rules": [ ... ] }
+```
+
+That single field is the difference between being able to change the rule format
+later and not, and it is cheaper to add now than to retrofit once rulesets are
+stored anywhere.
+
+### As data: JSON, and specifically polymorphic JSON
+
+Not Markdown — that is for documents people read, not machine-readable policy.
+The acceptance criteria commit to `kotlinx.serialization`, so JSON is settled.
+
+The structural question that matters is **how each node declares which variant it
+is**. A sealed hierarchy serialized polymorphically needs a *discriminator*;
+`kotlinx.serialization` writes a `"type"` key by default, adjustable through
+`@SerialName` and `classDiscriminator`. That mechanic **is** the serialization
+exercise, not an incidental detail of it.
+
+Roughly what a ruleset looks like on the wire — illustrative shape only, **not a
+prescribed AST**:
+
+```json
+{
+  "version": 1,
+  "rules": [
+    {
+      "expression": {
+        "type": "And",
+        "operands": [
+          { "type": "Segment", "segmentId": "vip" },
+          { "type": "CartValueAtLeast", "amountMinor": 10000, "currency": "USD" },
+          { "type": "Not", "operand": { "type": "Region", "region": "EU" } }
+        ]
+      },
+      "decisions": [
+        { "type": "ShowCta", "ctaId": "free-shipping", "variantKey": "urgency" }
+      ]
+    }
+  ]
+}
+```
+
+Note how the nesting mirrors the tree exactly. That correspondence is what makes
+"serialize → deserialize → `assertEquals`" a meaningful assertion rather than a
+formality.
+
+**Do not define `Ruleset` during the Python-shaped pass.** In step 2 below the
+"ruleset" is a `List<Map<String, Any?>>` and nothing more. A typed ruleset in v1
+defeats the comparison the exercise exists for; `Ruleset` becomes a real type in
+step 4.
+
+### Formats met in the wild
+
+Worth recognising by name, since a Java/Kotlin eCommerce shop will have opinions
+about at least two of them:
+
+| Format | Where it shows up |
+|:--|:--|
+| JSON | The default for rules-as-data, and this project's choice |
+| YAML | Human-authored rules; common in feature flagging |
+| Decision tables (CSV, spreadsheet) | Genuinely widespread in eCommerce and insurance |
+| Drools `.drl` | Its own text language, with its own engine |
+| A DSL over a typed tree | Day 3 here — authoring ergonomics without giving up the types |
+
+---
+
 ## Where to start
 
 The plan already answers this, in a line that reads like a footnote:
@@ -123,8 +294,12 @@ survive both implementations.**
 
 1. **Write the customer context first.** The evaluator's input. Smallest
    possible type, no behaviour. Everything depends on it; it depends on nothing.
+   This step is safe to do before settling anything in
+   [Decisions the plan does not make](#decisions-the-plan-does-not-make) — the
+   context holds customer facts either way.
 2. **Write the Python-shaped evaluator.** Fast, because it demands no design
-   decisions.
+   decisions of its own — but read decisions 1 and 2 in that section first,
+   because they fix the signature you are about to write twice.
 3. **Write the tests against it** — the full set, using real seeded values
    (`vip`, `free-shipping`, `EU`, a $129 product against a $59 one). This is the
    hard part and the part that pays twice.
@@ -181,25 +356,62 @@ evaluate once and you cannot filter products. So you need one of:
 - one pass per product, deduplicating CTA decisions afterwards
 - the type system keeping them apart, so the mismatch cannot be written
 
-### One thing to decide before writing the evaluator
+---
 
-**What does a predicate read?** The plan's example mixes them without comment:
-`Segment("vip")` and `CartValue gte 100.usd` are facts about the *customer*,
-while `Region("EU")` could be either — the customer's region, or a product's
-`regions` availability array. The seed supports both readings (products carry
-`US`, `EU`, `UK`, `APAC`).
+## Decisions the plan does not make
 
-Three ways out, and the plan picks none:
+Four questions the plan, #3 and this guide all leave open. They are gathered
+here rather than scattered, because a decision you cannot find is a decision you
+make twice.
 
-1. Predicates read the context only; product availability is filtered separately,
-   outside the rules engine.
+The first two shape the evaluator's signature, so they are worth settling before
+writing it. The last two only bite on the second rule, but they bite hard.
+
+### 1. What does a predicate read?
+
+The plan's example mixes sources without comment: `Segment("vip")` and
+`CartValue gte 100.usd` are facts about the *customer*, while `Region("EU")`
+could be either — the customer's region, or a product's `regions` availability
+array. The seed supports both readings (products carry `US`, `EU`, `UK`,
+`APAC`).
+
+1. Predicates read the context only; product availability is filtered
+   separately, outside the rules engine.
 2. Predicates read `(context, product)` together, so `Region` means "is this
    product available in the customer's region".
 3. Two predicate hierarchies, one per input, kept apart by the type system.
 
 Option 2 is the smallest thing that makes the plan's example work as written.
-This determines the evaluator's signature and therefore every test, so it is
-worth settling before step 2 above.
+
+### 2. Do all matching rules fire, or only the first?
+
+Drools fires every match; feature-flag evaluators usually stop at the first.
+
+The two decision families may want different answers, which is the interesting
+part: accumulating CTA decisions is sensible, whereas a single `Exclude`
+arguably ought to veto a product regardless of what else matched. If they do
+differ, that is evidence for the "two passes over two rule sets" resolution of
+the arity problem above.
+
+### 3. What happens when two rules disagree?
+
+One rule emits `ShowCta("free-shipping", "urgency")`; another emits
+`HideCta("free-shipping")`. Which wins?
+
+Real engines answer with priority or salience, first-match-wins, or
+last-write-wins. Any of those is defensible; having no answer is not, because
+the behaviour then depends on list order by accident rather than by decision.
+
+This one also determines a type: whether `evaluate` returns a raw
+`List<Decision>` or something that has already resolved conflicts.
+
+### 4. What is the default when nothing matches?
+
+Is a product included unless excluded, or excluded unless included?
+
+That choice silently decides whether an empty ruleset shows the entire catalog
+or none of it — and "empty ruleset" is exactly the state the first test runs
+against.
 
 ---
 
