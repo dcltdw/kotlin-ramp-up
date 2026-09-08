@@ -46,7 +46,7 @@ classpath is also pinned back — see the comments in `build.gradle.kts`.
 
 ## Container
 
-The image copies a pre-built jar rather than compiling; a 1 GB `t4g.small` is
+The image copies a pre-built jar rather than compiling; a 2 GiB `t4g.small` is
 the wrong place to run a Gradle build. Because a JVM jar is
 architecture-neutral, targeting Graviton from an x86 laptop is a plain layer
 copy with no emulation.

@@ -1,5 +1,5 @@
 # The jar is built by Gradle before this runs — deliberately not compiled here.
-# The EC2 instance is a t4g.small (1 GB, Graviton); compiling on the box, or
+# The EC2 instance is a t4g.small (2 GiB, Graviton); compiling on the box, or
 # even running a Gradle build stage in this image, is exactly what that
 # instance is too small to do well.
 #
@@ -18,5 +18,9 @@ USER app
 EXPOSE 8080
 
 # MaxRAMPercentage rather than a fixed -Xmx: the JVM reads the container limit,
-# so the same image behaves sensibly on a 1 GB t4g.small and on a laptop.
+# so the same image behaves sensibly on a 2 GiB t4g.small and on a laptop.
+#
+# Note what this delegates: the heap is sized from `docker run --memory`, not
+# from the instance. Set that limit too low and the JVM quietly uses a fraction
+# of the machine — see container_memory in infra/variables.tf.
 ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-jar", "/app/app.jar"]

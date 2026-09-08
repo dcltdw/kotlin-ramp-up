@@ -12,6 +12,7 @@ cat > /etc/catalog.env <<ENVFILE
 AWS_REGION=${region}
 CATALOG_IMAGE=${image_uri}
 APP_PORT=${app_port}
+CONTAINER_MEMORY=${container_memory}
 ENVFILE
 chmod 0644 /etc/catalog.env
 
@@ -22,7 +23,7 @@ cat > /usr/local/bin/catalog-start <<'SCRIPT'
 #!/bin/bash
 set -euo pipefail
 
-: "$${AWS_REGION:?}" "$${CATALOG_IMAGE:?}" "$${APP_PORT:?}"
+: "$${AWS_REGION:?}" "$${CATALOG_IMAGE:?}" "$${APP_PORT:?}" "$${CONTAINER_MEMORY:?}"
 
 # Registry host is the image URI up to the first slash.
 registry="$${CATALOG_IMAGE%%/*}"
@@ -33,11 +34,15 @@ aws ecr get-login-password --region "$AWS_REGION" \
 docker pull "$CATALOG_IMAGE"
 
 # exec so the container is PID 1 of the unit and systemd sees it exit.
+#
+# The memory limit is what the JVM sizes its heap from, because the image sets
+# -XX:MaxRAMPercentage. It is a variable rather than a literal precisely so it
+# cannot drift away from the instance type again.
 exec docker run \
   --rm \
   --name catalog \
   --publish "$APP_PORT:8080" \
-  --memory 1g \
+  --memory "$CONTAINER_MEMORY" \
   "$CATALOG_IMAGE"
 SCRIPT
 chmod 0755 /usr/local/bin/catalog-start

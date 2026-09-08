@@ -57,6 +57,27 @@ variable "app_port" {
   default     = 8080
 }
 
+variable "container_memory" {
+  description = <<-EOT
+    Memory limit for the container, in `docker run --memory` syntax.
+
+    A t4g.small has 2048 MiB, of which the kernel leaves about 1841 MiB usable.
+    The default here leaves roughly 340 MiB for the OS, dockerd and the SSM
+    agent, which measured around 150-200 MiB in practice.
+
+    This is worth getting right rather than leaving generous: the image sets
+    -XX:MaxRAMPercentage=75.0, so the JVM sizes its heap from *this* number and
+    not from the instance. A limit of 1g would cap the heap near 768 MB and
+    leave half the box idle — which is invisible until Day 5 measures p50/p99
+    under load and reports figures for the wrong machine.
+
+    Prefer changing this over removing the limit. Uncapped, a runaway container
+    takes the host down with it instead of dying alone.
+  EOT
+  type        = string
+  default     = "1500m"
+}
+
 variable "app_ingress_cidrs" {
   description = <<-EOT
     Who may reach the app port. Defaults to the whole internet because "deployed

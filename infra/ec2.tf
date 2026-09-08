@@ -9,9 +9,10 @@ resource "aws_instance" "app" {
   # lose, or rotate.
 
   user_data = templatefile("${path.module}/user-data.sh.tftpl", {
-    region    = var.aws_region
-    image_uri = local.image_uri
-    app_port  = var.app_port
+    region           = var.aws_region
+    image_uri        = local.image_uri
+    app_port         = var.app_port
+    container_memory = var.container_memory
   })
 
   # user_data changes should rebuild the box rather than silently do nothing.

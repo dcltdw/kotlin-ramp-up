@@ -5,7 +5,7 @@
 #
 # The order matters: the jar is built locally, baked into an arm64 image locally,
 # and pushed to ECR. Nothing is compiled on the instance, which is the whole
-# reason a 1 GB t4g.small is enough.
+# reason a 2 GiB t4g.small is enough.
 #
 # Usage:  scripts/deploy.sh
 #         scripts/deploy.sh --skip-build     # reuse the jar already in build/libs
