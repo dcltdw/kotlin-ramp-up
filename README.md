@@ -13,8 +13,8 @@ a Kotlin DSL and compiled to a sealed-class AST, a Contentful content source
 with caching and concurrent bulk fetch, and a hand-made "legacy Magento-shaped"
 JSON export migrated into the Contentful content model.
 
-**Stack.** Kotlin 2.4 · Spring Boot 4.1.1 · Java 21/25 LTS · Gradle Kotlin DSL ·
-ktlint/Detekt/Kover · deployed to EC2 (`t4g.small`).
+**Stack.** Kotlin 2.4.10 · Spring Boot 4.1.1 · Java 21 LTS · Gradle 9.7.1 Kotlin
+DSL · ktlint/Detekt/Kover · deployed to EC2 (`t4g.small`).
 
 | Day | Focus | Mode |
 |:---|:---|:---|
@@ -29,3 +29,34 @@ three deployments.
 
 Full plan, including the requisition mapping, scope cut-list and cost
 guardrails: [docs/kotlin-5-day-plan.pdf](docs/kotlin-5-day-plan.pdf).
+
+## Building
+
+```sh
+./gradlew build          # compile, ktlint, detekt, test, coverage
+./gradlew bootRun        # http://localhost:8080/api/ping
+```
+
+The Gradle daemon is pinned to **Java 21** in
+`gradle/gradle-daemon-jvm.properties`, and Gradle downloads that JDK on first
+run if it is not installed. The pin is not cosmetic: detekt 1.23.8 runs
+in-process in the daemon and its bundled compiler throws on a JDK 25 runtime.
+There is no detekt release that supports Kotlin 2.4 yet, so its analysis
+classpath is also pinned back — see the comments in `build.gradle.kts`.
+
+## Container
+
+The image copies a pre-built jar rather than compiling; a 1 GB `t4g.small` is
+the wrong place to run a Gradle build. Because a JVM jar is
+architecture-neutral, targeting Graviton from an x86 laptop is a plain layer
+copy with no emulation.
+
+```sh
+./gradlew build
+docker buildx build --platform linux/arm64 -t catalog-personalization:arm64 .
+```
+
+## Contentful
+
+Catalog content lives in Contentful. See [contentful/README.md](contentful/README.md)
+for the content model, the seed, and how to reset the space.

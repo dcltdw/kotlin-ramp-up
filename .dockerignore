@@ -1,0 +1,5 @@
+# Only build/libs/*.jar is needed. Everything else would bloat the context and
+# risk baking local state — including .env and .contentfulrc.json — into an
+# image that gets pushed to a registry.
+*
+!build/libs/*.jar
