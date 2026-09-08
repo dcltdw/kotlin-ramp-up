@@ -8,6 +8,10 @@ ktlint = "14.2.0"
 mockk = "1.14.11"
 testcontainers = "2.0.5"
 kotlinxSerialization = "1.11.0"
+# Property testing only — not Kotest's spec style. The project uses JUnit 5,
+# and kotest-property runs happily inside a JUnit @Test via checkAll.
+# 5.9.1 is the newest stable; 6.0.0 is still publishing milestones.
+kotestProperty = "5.9.1"
 
 [libraries]
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web" }
@@ -19,6 +23,12 @@ kotlinx-coroutines-reactor = { module = "org.jetbrains.kotlinx:kotlinx-coroutine
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 testcontainers-junit-jupiter = { module = "org.testcontainers:testcontainers-junit-jupiter", version.ref = "testcontainers" }
+kotest-property = { module = "io.kotest:kotest-property", version.ref = "kotestProperty" }
+# kotest-property's checkAll is a suspend function, but the library does not put
+# kotlinx-coroutines on the consumer's compile classpath — so calling it needs
+# runBlocking, and runBlocking needs this declared explicitly. Version comes
+# from the Spring Boot BOM, like the other unversioned entries here.
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

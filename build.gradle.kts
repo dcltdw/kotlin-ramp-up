@@ -49,6 +49,8 @@ dependencies {
     testImplementation(libs.spring.boot.starter.test)
     testImplementation(libs.mockk)
     testImplementation(libs.testcontainers.junit.jupiter)
+    testImplementation(libs.kotest.property)
+    testImplementation(libs.kotlinx.coroutines.core)
 }
 
 detekt {
@@ -88,6 +90,31 @@ kover {
                 // annotation; there is nothing in it worth asserting.
                 classes("dev.dcltdw.catalog.CatalogApplicationKt")
             }
+        }
+
+        verify {
+            // Without a rule, koverVerify passes vacuously — it did until now,
+            // so "coverage is enforced" was a claim the build did not support.
+            rule {
+                minBound(
+                    minValue = 80,
+                    coverageUnits = kotlinx.kover.gradle.plugin.dsl.CoverageUnit.LINE,
+                )
+            }
+
+            // Deliberately LINE only, and deliberately 80 rather than higher.
+            //
+            // No BRANCH bound yet: there are no branches in the codebase today,
+            // and a bound over zero branches measures nothing. Day 2's sealed
+            // `when` blocks are almost entirely branches, so that is the point
+            // to add one.
+            //
+            // 80 is a floor, not a target. The domain code on Day 2 is pure
+            // functions with hand-written tests and should sit far above it;
+            // the floor exists to catch a regression, not to define done. Set
+            // it at today's actual 100% and the first hard-to-cover Spring
+            // branch on Day 3 turns the gate into an argument to be won rather
+            // than a signal.
         }
     }
 }
