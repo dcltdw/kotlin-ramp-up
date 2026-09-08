@@ -1,0 +1,16 @@
+# Copy to terraform.tfvars and fill in. terraform.tfvars is gitignored
+# (.gitignore has *.tfvars with a !*.tfvars.example exception), so the real file
+# never gets committed.
+
+# Required. Where AWS Budgets sends the $25 alerts. Use an address you actually
+# read — an unmonitored budget alert is the same as no budget alert.
+budget_alert_email = "you@example.com"
+
+# Optional overrides; the defaults match the plan.
+# aws_region        = "us-east-1"
+# instance_type     = "t4g.small"
+# budget_limit_usd  = "25"
+
+# Narrow public exposure to just your own address if you prefer. Find it with
+# `curl -s https://checkip.amazonaws.com`.
+# app_ingress_cidrs = ["203.0.113.4/32"]
