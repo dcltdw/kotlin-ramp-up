@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: catalog-personalization
+
+info:
+  app:
+    version: 0.1.0
+
+server:
+  port: 8080
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      # Liveness and readiness are split out now because Day 5 wants them, and
+      # because a load balancer that cannot tell "starting" from "broken" is a
+      # deployment problem you find at the worst possible moment.
+      probes:
+        enabled: true
+      show-details: when-authorized

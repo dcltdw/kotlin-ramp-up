@@ -1,0 +1,19 @@
+# Overrides on top of detekt's default config (buildUponDefaultConfig = true).
+# Kept deliberately small — the defaults are a reasonable starting point, and a
+# large hand-tuned ruleset on day one is a way to spend the week arguing with a
+# linter instead of learning Kotlin.
+
+style:
+  # The sealed AST and its exhaustive `when` blocks are the point of the
+  # project. Detekt's defaults would flag them as too long or too complex.
+  MaxLineLength:
+    maxLineLength: 120
+
+complexity:
+  LongMethod:
+    active: true
+    threshold: 80
+  TooManyFunctions:
+    active: true
+    thresholdInFiles: 20
+    thresholdInClasses: 20
