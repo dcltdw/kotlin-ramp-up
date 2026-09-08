@@ -49,8 +49,14 @@ resource "aws_route_table_association" "public" {
 }
 
 resource "aws_security_group" "app" {
-  name        = "${local.name}-app"
-  description = "App port inbound; all egress. No SSH — access is via SSM Session Manager."
+  name = "${local.name}-app"
+
+  # ASCII only, and deliberately so: EC2 rejects CreateSecurityGroup outright if
+  # GroupDescription contains anything beyond ASCII, with "Character sets beyond
+  # ASCII are not supported". An em dash here failed the first apply after 13
+  # other resources had already been created. Variable descriptions are
+  # Terraform-local and unaffected; this one is sent to the AWS API.
+  description = "App port inbound; all egress. No SSH - access is via SSM Session Manager."
   vpc_id      = aws_vpc.main.id
 
   tags = { Name = "${local.name}-app" }
