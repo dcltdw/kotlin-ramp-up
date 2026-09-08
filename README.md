@@ -46,7 +46,7 @@ classpath is also pinned back — see the comments in `build.gradle.kts`.
 
 ## Container
 
-The image copies a pre-built jar rather than compiling; a 1 GB `t4g.small` is
+The image copies a pre-built jar rather than compiling; a 2 GiB `t4g.small` is
 the wrong place to run a Gradle build. Because a JVM jar is
 architecture-neutral, targeting Graviton from an x86 laptop is a plain layer
 copy with no emulation.
@@ -55,6 +55,25 @@ copy with no emulation.
 ./gradlew build
 docker buildx build --platform linux/arm64 -t catalog-personalization:arm64 .
 ```
+
+## Deploy
+
+One `t4g.small` on a public subnet, running the arm64 container out of ECR.
+No NAT Gateway, no load balancer, no SSH — shell access is SSM Session Manager.
+Roughly **$0.53/day**.
+
+```sh
+cp infra/terraform.tfvars.example infra/terraform.tfvars   # set your alert email
+terraform -chdir=infra init
+terraform -chdir=infra apply
+
+scripts/deploy.sh          # build, push to ECR, restart, verify reachable
+scripts/teardown.sh        # destroy everything, then prove it is gone
+```
+
+Both scripts are meant to be read before they are run — that is the plan's rule
+for deployment work from Day 2 onward. Full runbook, cost breakdown and the
+state-file warnings: [infra/README.md](infra/README.md).
 
 ## Contentful
 

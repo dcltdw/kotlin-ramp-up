@@ -1,0 +1,80 @@
+#!/bin/bash
+# Rendered by Terraform's templatefile(). Only $${...} reaches bash as a braced
+# expansion; bare $VAR forms are invisible to Terraform and pass through as-is.
+set -euxo pipefail
+
+dnf install -y docker
+systemctl enable --now docker
+
+# Config the service needs, kept out of the unit file so a redeploy never has to
+# touch systemd.
+cat > /etc/catalog.env <<ENVFILE
+AWS_REGION=${region}
+CATALOG_IMAGE=${image_uri}
+APP_PORT=${app_port}
+CONTAINER_MEMORY=${container_memory}
+ENVFILE
+chmod 0644 /etc/catalog.env
+
+# Log in, pull, then hand the container to systemd in the foreground. Doing the
+# login and pull here rather than at build time means `systemctl restart
+# catalog` is a complete redeploy: it always fetches the current :latest.
+cat > /usr/local/bin/catalog-start <<'SCRIPT'
+#!/bin/bash
+set -euo pipefail
+
+: "$${AWS_REGION:?}" "$${CATALOG_IMAGE:?}" "$${APP_PORT:?}" "$${CONTAINER_MEMORY:?}"
+
+# Registry host is the image URI up to the first slash.
+registry="$${CATALOG_IMAGE%%/*}"
+
+aws ecr get-login-password --region "$AWS_REGION" \
+  | docker login --username AWS --password-stdin "$registry"
+
+docker pull "$CATALOG_IMAGE"
+
+# exec so the container is PID 1 of the unit and systemd sees it exit.
+#
+# The memory limit is what the JVM sizes its heap from, because the image sets
+# -XX:MaxRAMPercentage. It is a variable rather than a literal precisely so it
+# cannot drift away from the instance type again.
+exec docker run \
+  --rm \
+  --name catalog \
+  --publish "$APP_PORT:8080" \
+  --memory "$CONTAINER_MEMORY" \
+  "$CATALOG_IMAGE"
+SCRIPT
+chmod 0755 /usr/local/bin/catalog-start
+
+cat > /etc/systemd/system/catalog.service <<'UNIT'
+[Unit]
+Description=Catalog personalization service
+Documentation=https://github.com/dcltdw/kotlin-ramp-up
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+EnvironmentFile=/etc/catalog.env
+# Clear a container left behind by an unclean stop. Leading - so a missing
+# container is not a startup failure.
+ExecStartPre=-/usr/bin/docker rm -f catalog
+ExecStart=/usr/local/bin/catalog-start
+ExecStop=/usr/bin/docker stop --time 30 catalog
+Restart=always
+RestartSec=5
+# The JVM needs longer than systemd's default to come up on a t4g.small.
+TimeoutStartSec=180
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+systemctl daemon-reload
+systemctl enable catalog
+
+# Deliberately not `--now`. On the very first boot no image has been pushed yet,
+# so a start here would fail and land the unit in a crash loop that looks like a
+# real fault. scripts/deploy.sh pushes and then starts it.
+echo "catalog.service enabled; awaiting first image push"
