@@ -35,6 +35,36 @@ product takes the same branch.
 Note that `variantKey` is `control` on two different variants. That is
 intentional, and why `variantKey` must not carry a `unique` validation.
 
+## Provenance
+
+The content model and part of the catalog were built by hand in the Contentful
+web UI; the rest was added by this seed. Entry IDs tell the two apart:
+hand-entered entries carry the opaque IDs Contentful assigned them
+(`zhGBj4ACILoawYIXfH1aw`), while entries this seed created use readable ones
+(`product-cat-tree-dlx`).
+
+**Hand-built in the web UI**
+
+- All five content types. Authoring a model in the UI was the point of the
+  exercise, which is also why the type names are inconsistent — `Product`,
+  `Category` and `CTA` against `ctaVariant` and `segment`, created in separate
+  sittings. Not worth correcting: a content type ID is referenced by every
+  entry of that type and by every delivery API query.
+- 11 of the 25 entries — 4 categories, 3 segments, and 4 products
+  (`RAB-ALF-2KG`, `RAB-TIM-2KG`, `DOG-FD-ECON`, `DOG-FD-PREM`).
+
+**Added by this seed**
+
+- 14 entries — 8 products, 2 CTAs, 4 `ctaVariant`s. Day 1 called for a dozen
+  hand-entered products; four were entered by hand and the other eight came
+  from here, chosen to give the distribution above.
+- The four hand-entered products' SKUs. They were placeholders (`1`-`4`),
+  rewritten to real codes so the Day 4 Magento migration is a real mapping
+  rather than an identity function. Those entries are otherwise unchanged.
+- `product.currency` postdates the type's first definition — it sits last in
+  the field list, after `image`, and Contentful orders fields by creation. The
+  two non-USD products require it.
+
 ## Re-seeding
 
 Authentication comes from `.contentfulrc.json` in the repo root (gitignored),
