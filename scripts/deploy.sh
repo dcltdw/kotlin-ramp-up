@@ -26,8 +26,19 @@ command -v docker >/dev/null || fail "docker not found"
 command -v aws >/dev/null || fail "aws cli not found"
 command -v terraform >/dev/null || fail "terraform not found"
 
-aws sts get-caller-identity >/dev/null 2>&1 \
-  || fail "AWS session is not valid. Run 'aws login' (or refresh your SSO profile) first."
+# Show which identity this is about to act as, rather than just checking that
+# some identity exists. A valid session in the wrong account looks identical to
+# a valid session in the right one until the resources show up.
+#
+# Note: `aws login` and `aws sso login` are different mechanisms. An IAM
+# Identity Center profile needs the latter:
+#   aws sso login --profile <name> && export AWS_PROFILE=<name>
+CALLER="$(aws sts get-caller-identity --query '[Account,Arn]' --output text 2>/dev/null)" \
+  || fail "AWS session is not valid. For an IAM Identity Center profile: aws sso login --profile <name>"
+
+echo "  profile    : ${AWS_PROFILE:-default}"
+echo "  account    : $(cut -f1 <<<"$CALLER")"
+echo "  identity   : $(cut -f2 <<<"$CALLER")"
 
 [[ -f "$INFRA_DIR/terraform.tfstate" ]] \
   || fail "No terraform.tfstate in infra/. Run 'terraform apply' there before deploying."

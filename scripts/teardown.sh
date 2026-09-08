@@ -20,8 +20,16 @@ fail() { printf '\n\033[1;31mERROR: %s\033[0m\n' "$1" >&2; exit 1; }
 command -v terraform >/dev/null || fail "terraform not found"
 command -v aws >/dev/null || fail "aws cli not found"
 
-aws sts get-caller-identity >/dev/null 2>&1 \
-  || fail "AWS session is not valid. Run 'aws login' (or refresh your SSO profile) first."
+# Print the identity before destroying anything. This is the one script where
+# acting on the wrong account would be actively destructive.
+#
+# `aws login` and `aws sso login` are different mechanisms; an IAM Identity
+# Center profile needs the latter.
+CALLER="$(aws sts get-caller-identity --query '[Account,Arn]' --output text 2>/dev/null)" \
+  || fail "AWS session is not valid. For an IAM Identity Center profile: aws sso login --profile <name>"
+
+printf 'Destroying as:\n  profile  : %s\n  account  : %s\n  identity : %s\n' \
+  "${AWS_PROFILE:-default}" "$(cut -f1 <<<"$CALLER")" "$(cut -f2 <<<"$CALLER")"
 
 [[ -f "$INFRA_DIR/terraform.tfstate" ]] \
   || fail "No terraform.tfstate in infra/ — nothing to destroy from here. If resources exist anyway, see the 'Lost state' section of infra/README.md."

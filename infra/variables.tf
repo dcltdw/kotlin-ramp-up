@@ -4,6 +4,36 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
+variable "aws_profile" {
+  description = <<-EOT
+    Named profile to authenticate with. Leave null to use the standard
+    resolution chain (AWS_PROFILE, then `default`).
+
+    Set it when `default` is not the account you want. On this machine the
+    admin profile is an IAM Identity Center one:
+
+      aws sso login --profile AdministratorAccess-675789572470
+
+    Note that `aws login` is a different mechanism — console credentials for
+    local development — and will not authenticate an SSO profile.
+  EOT
+  type        = string
+  default     = null
+}
+
+variable "expected_account_id" {
+  description = <<-EOT
+    Refuse to apply unless the caller is this account. Leave null to skip the
+    check.
+
+    Worth setting when the target account is shared with other projects: a
+    misresolved profile otherwise creates a second copy of everything in the
+    wrong account, and the only symptom is a surprising bill.
+  EOT
+  type        = string
+  default     = null
+}
+
 variable "project" {
   description = "Name prefix and Project tag on every resource, so a teardown can be verified by tag."
   type        = string

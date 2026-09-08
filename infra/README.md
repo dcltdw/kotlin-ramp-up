@@ -41,14 +41,37 @@ rather than stopping the box.
 ## Prerequisites
 
 ```sh
-aws login                              # or refresh your SSO profile
-aws sts get-caller-identity            # must succeed before anything below
+aws sso login --profile AdministratorAccess-675789572470
+export AWS_PROFILE=AdministratorAccess-675789572470
+aws sts get-caller-identity            # must succeed, and show the right account
+
 cp terraform.tfvars.example terraform.tfvars
 $EDITOR terraform.tfvars               # set budget_alert_email
 ```
 
+**`aws login` and `aws sso login` are different mechanisms, and only one works
+here.** `aws login` is the newer flow for local development against AWS
+Management Console credentials. The admin profile on this machine is an IAM
+Identity Center profile (`sso_session = annotated-maps`, account
+`675789572470`), which needs `aws sso login`. The `default` profile carries no
+role or SSO configuration at all, so an expired-session error from a call with
+no `--profile` is about `default`, not about the profile you want.
+
 `terraform.tfvars` is gitignored. The email has no default on purpose: an
 unmonitored budget alert is the same as no budget alert.
+
+### If the account is shared with another project
+
+Set `expected_account_id` in `terraform.tfvars`. A precondition then fails the
+**plan** if credentials resolve anywhere else, which is the difference between
+noticing a misresolved profile and paying for a duplicate stack you did not know
+existed.
+
+Note also that the budget in `budget.tf` is **account-wide**, not filtered by
+tag — deliberately, because the plan's $100 cap is an account-level concern. In
+a shared account it will therefore include the other project's spend. If you
+want it scoped to this project only, add a `cost_filter` on the `Project` tag,
+and accept that it will then miss anything created outside this Terraform.
 
 ## First deploy
 
