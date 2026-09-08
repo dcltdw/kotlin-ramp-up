@@ -30,6 +30,12 @@ three deployments.
 Full plan, including the requisition mapping, scope cut-list and cost
 guardrails: [docs/kotlin-5-day-plan.pdf](docs/kotlin-5-day-plan.pdf).
 
+Per-day working guides, where they exist:
+
+- Day 2 — [docs/day-2-domain-and-rules-ast.md](docs/day-2-domain-and-rules-ast.md):
+  the CTA vocabulary, the customer context, the four seams, and the test
+  conventions. The tracking issue stays authoritative for done-ness.
+
 ## Building
 
 ```sh
